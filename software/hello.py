@@ -1,30 +1,30 @@
 # all the imports
 import sqlite3
-from flask import Flask, Response, request, session, g, redirect, url_for, \
-     abort, render_template, flash
+from flask import Flask, request, Response
 import urllib2
 
-# configuration
-DATABASE = '/tmp/flaskr.db'
-DEBUG = True
-SECRET_KEY = 'development key'
-USERNAME = 'admin'
-PASSWORD = 'default'
-
 app = Flask(__name__)
-app.config.from_object(__name__)
 
-def connect_db():
-    return sqlite3.connect(app.config['DATABASE'])
+last_notification = ''
 
-
-@app.route('/hook/payment_received')
+@app.route('/hook/payment_received', methods=['POST', ])
 def hook_payment_received():
-    with open("status.txt", "a") as myfile:
-        myfile.write("Payment Recieved")
-        
+    if request.method == "POST":
+        timestamp = request.form['created_at']
+        id = request.form['id']
+
+        last_notification = timestamp
+
     return ""
 
+
+@app.route('/status')
+def get_status():
+    return Response(response=last_notification, mimetype="text/plain")
+
+@app.route('/status/set/<timestamp>')
+def set_status(timestamp):
+    last_notification = timestamp
 
 @app.route('/')
 def hello():

@@ -44,7 +44,7 @@ void calibrate()
 	coinLevel = readAVG();
 	vSerial.println(coinLevel);
 	vSerial.println("Ok.");
-	sensitivity = (lightLevel-coinLevel)/2;
+	sensitivity =  50;//(lightLevel-coinLevel)/2;
 	vSerial.print("sensitivity");
 	vSerial.println(sensitivity);
 	measureTime = 100;
@@ -72,15 +72,15 @@ void detectCoins()
 	{duration = 0;}
 	int light = readAVG();
 
-	if(light<900 && duration == 0)
+	if(light<(lightLevel-sensitivity) && duration == 0)
 	{
 		duration = 10;
 		digitalWrite(ledPin,LOW);
-		vSerial.println("Coin");
+		vSerial.println("Coin!");
 		lightUP();
 		digitalWrite(ledPin,HIGH);
 	}
-	//vSerial.print(duration);
+	Serial.print(duration);
 	//vSerial.print(" ");
 	//vSerial.println(light);
 }

@@ -1,5 +1,5 @@
 # all the imports
-from flask import Flask, request, Response, redirect
+from flask import Flask, request, Response, redirect, url_for, render_template
 import datetime, time
 
 app = Flask(__name__)
@@ -38,4 +38,10 @@ def set_status(timestamp):
 
 @app.route('/')
 def hello():
-    return '!Hello World!'
+    return render_template("index.html")
+
+with app.test_request_context():
+    url_for('static', filename='css/framework7.min.css')
+    url_for('static', filename='css/my-app.css')
+    url_for('static', filename='js/framework7.min.js')
+    url_for('static', filename='js/my-app.js')

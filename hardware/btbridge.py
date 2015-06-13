@@ -8,4 +8,7 @@ while True:
 	print line
 	if "Coin" in line:
 		print "!!!!!!!"
-		print urllib2.urlopen("http://payment-backend.herokuapp.com/status/").read()
+		try:
+			print urllib2.urlopen("http://payment-backend.herokuapp.com/hook/payment_received").read()
+		except:
+			pass

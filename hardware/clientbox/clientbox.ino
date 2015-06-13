@@ -25,7 +25,7 @@ void setup() {
 void loop() {
 	timePast++;  
 	detectCoins();
-	if(timePast > 5)
+	if(timePast > 2)
 	{
 		timePast=0;
 		processLight();
@@ -52,11 +52,11 @@ void calibrate()
 
 void processLight()
 {
-	level-=5;
+	level-=2;
 	if(level<5) level = 5;
 	analogWrite(lightPin,level);
-	vSerial.print("Light ");
-	vSerial.println(level);
+	//vSerial.print("Light ");
+	//vSerial.println(level);
 }
 
 void lightUP()

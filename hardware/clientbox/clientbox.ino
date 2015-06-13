@@ -1,16 +1,20 @@
 #include <SoftwareSerial.h>
 SoftwareSerial vSerial(10, 11); // RX, TX
 
-const int ledPin = 13;
-const int lightPin = A0; 
-const int calibrationTime = 1000;
-const int calibrateMeasurmentCount = 10;
-const int s = 500;
+const int ledPin = 12;
+const int lightPin = 13;
+const int sensorPin = A0; 
+int measureTime = 3000;
+const int measureCount = 5;
 
-int avgLevel = 0;
-int minLevel = 1024;
-int maxLevel = 0;
-int sensitivity = 1024;
+int level = 250;
+int lightLevel = 950;
+int coinLevel = 890;
+int sensitivity = (lightLevel-coinLevel)/2;
+long unsigned int t = 0;  
+long int duration = 0;
+int timePast = 0;
+
 void setup() {
 	Serial.begin(9600);
 	vSerial.begin(9600);  
@@ -19,47 +23,79 @@ void setup() {
 }
 
 void loop() {
+	timePast++;  
 	detectCoins();
+	if(timePast > 5)
+	{
+		timePast=0;
+		processLight();
+	}
+	//delay(10);
 }
 
 void calibrate()
 {
-	vSerial.print("Calibration:");
+	vSerial.println("Calibration:");
+	lightLevel = readAVG();
+	vSerial.println(lightLevel);
+	vSerial.println("Put a coint and wait a second:");
+	delay(1000);
+	vSerial.print("...");
+	coinLevel = readAVG();
+	vSerial.println(coinLevel);
+	vSerial.println("Ok.");
+	sensitivity = (lightLevel-coinLevel)/2;
+	vSerial.print("sensitivity");
+	vSerial.println(sensitivity);
+	measureTime = 100;
+}
 
-	int light = analogRead(lightPin);
-	int count = 1;
-	avgLevel = light;
-	for(int i=1;i<calibrateMeasurmentCount;i++)
-	{  
-		int light = analogRead(lightPin);
-		minLevel = min(minLevel,light);
-		maxLevel = max(maxLevel,light);
-		avgLevel = avgLevel + light;
-		count ++;
-		delay(calibrationTime/calibrateMeasurmentCount);
-	}
-	avgLevel = avgLevel / count;
-	vSerial.print("Avg:");
-	vSerial.println(avgLevel);
-	vSerial.print("Min:");
-	vSerial.println(minLevel);
-	vSerial.print("Min:");
-	vSerial.println(maxLevel);
-	sensitivity = (maxLevel - minLevel) / 2;
+void processLight()
+{
+	level-=5;
+	if(level<5) level = 5;
+	analogWrite(lightPin,level);
+	vSerial.print("Light ");
+	vSerial.println(level);
+}
+
+void lightUP()
+{
+	level+=50;
+	if(level>250) level = 250;
 }
 
 void detectCoins()
 {
-	int light = analogRead(lightPin);
-	if(light<930)
+	duration--;
+	if(duration<0) 
+	{duration = 0;}
+	int light = readAVG();
+
+	if(light<900 && duration == 0)
 	{
+		duration = 10;
 		digitalWrite(ledPin,LOW);
 		vSerial.println("Coin");
-		delay(1000);
+		lightUP();
 		digitalWrite(ledPin,HIGH);
-	}	
-	vSerial.println(light);
-	delay(100);
+	}
+	//vSerial.print(duration);
+	//vSerial.print(" ");
+	//vSerial.println(light);
+}
+
+int readAVG()
+{
+	int count = 0;
+	int result = 0;
+	for(int i=1;i<measureCount;i++)
+	{  
+		result = result + analogRead(sensorPin);;
+		count ++;
+		delay(measureTime/measureCount);
+	}
+	return result / count;
 }
 
 

@@ -1,16 +1,20 @@
+
 int s = 500;
-int led1 = 13;
+int ledPin = 13;
+int lightPin = A0; 
 
 void setup() {
   Serial.begin(9600);
-  pinMode(led1, OUTPUT);
+  pinMode(ledPin, OUTPUT);
 }
 
 void loop() {
   Serial.println("Yo");
-  digitalWrite(led1,LOW);
+  int light = analogRead(lightPin);
+  Serial.println(light);
+  digitalWrite(ledPin,LOW);
   delay(s);
-  digitalWrite(led1,HIGH);
+  digitalWrite(ledPin,HIGH);
   delay(s);
 }
 
